@@ -8,6 +8,7 @@ class game():
         self.playerScore = 0
         self.p1Score = 0
         self.p2Score = 0
+        self.setScore(self)
         
     def setScore(self):
         if(self.gameMode == '3p'):
