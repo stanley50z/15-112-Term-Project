@@ -1,13 +1,17 @@
 import copy
+import string
 from turtle import pos
 
 class Player():
     def __init__(self):
         self.hand = dict() #key: tileType, value: number of tile
         self.openMelds = list() #List of tuples that represent groups
+        self.board = list()
+        
         self.draw = "s5"
+        self.wind = "E"
         self.sq = 0 #手切次数
-        self.board = dict()
+
         
     def discard(self, tile):
         if(tile not in self.hand.keys()):
@@ -16,13 +20,12 @@ class Player():
             self.sq += 1
         self.hand[self.draw] += 1
         self.hand[tile] -= 1
-        self.board[tile] = self.board.get(tile,0)+1
+        #I have thought about doing an addTile/removeTile function, 
+        # but self.board = self.addTile(tile,self.board) is not that shorter
+        self.board[tile] = self.board.get(tile,0)+1 
         if self.hand[tile] == 0:
             self.hand.pop(tile)
         return True
-    
-    def setHand(self,dict):
-        self.hand = dict
     
     def isLegal(self,dict):
         for v in dict.values():
@@ -69,23 +72,52 @@ class Player():
                         return True
                     dict = copy.deepcopy(old)
             return False
-            
-    
+               
     def checkWin(self, draw = None):
         if draw == None:
             draw = self.draw
         hand = copy.deepcopy(self.hand)
         #add the drawn tile
         hand[self.draw] = hand.get(self.draw,0)+1
-        return self.dfsSearchGroup(hand)
+        if not self.dfsSearchGroup(hand): return False #Finished checking basic pattern, now check yaku
         
-p = Player()
-h = {
-    "s1":2,
-    "s2":2,
-    "s3":2,
-    "s5":1
+        return True
     
-}
-p.setHand(h)
-print(p.checkWin(draw="s5"))
+    def addSQ(self):
+        self.sq += 1
+
+    #  ██████╗ ███████╗████████╗       ██╗       ███████╗███████╗████████╗
+    # ██╔════╝ ██╔════╝╚══██╔══╝       ██║       ██╔════╝██╔════╝╚══██╔══╝
+    # ██║  ███╗█████╗     ██║       ████████╗    ███████╗█████╗     ██║   
+    # ██║   ██║██╔══╝     ██║       ██╔═██╔═╝    ╚════██║██╔══╝     ██║   
+    # ╚██████╔╝███████╗   ██║       ██████║      ███████║███████╗   ██║   
+    #  ╚═════╝ ╚══════╝   ╚═╝       ╚═════╝      ╚══════╝╚══════╝   ╚═╝   
+                                                                        
+    def setHand(self,dict:dict):    
+        self.hand = dict
+    def getHand(self)->dict:        
+        return self.hand
+    def setBoard(self,board:list):  
+        self.board = board
+    def getBoard(self)->list:       
+        return self.board
+    def setDraw(self,tile:string):  
+        self.draw = tile
+    def getDraw(self)->string:      
+        return self.draw
+    def getSQ(self)->int:
+        return self.sq
+    
+    
+    def getFullHand(self) -> dict:
+        fullHand = copy.deepcopy(self.hand)
+        for group in self.openMelds:
+            for tile in group:
+                fullHand[tile] = fullHand.get(tile,0) + 1
+        fullHand[self.draw] = fullHand.get(self.draw,0) + 1
+        
+        
+        
+        
+        
+        
