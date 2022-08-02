@@ -5,7 +5,7 @@ class Player():
     def __init__(self):
         self.hand = dict() #key: tileType, value: number of tile
         self.openMelds = list() #List of tuples that represent groups
-        self.draw = ""
+        self.draw = "s5"
         self.sq = 0 #手切次数
         self.board = dict()
         
@@ -24,18 +24,13 @@ class Player():
     def setHand(self,dict):
         self.hand = dict
     
-    def isLegal(dict):
+    def isLegal(self,dict):
         for v in dict.values():
             if v < 0:
                 return False
         return True
-    
-    def clearZeros(dict):
-        for key in dict.keys():
-            if(dict[key]==0):
-                dict.pop(key)
-        return dict
-    def getGroup(tile): 
+
+    def getGroup(self,tile): 
         possibleGroups = [(tile,tile)] #every 3 of a kind is a group
         type = tile[0]
         if(type=='p' or type=='s' or type=='m'):
@@ -56,23 +51,24 @@ class Player():
                 possibleGroups.append((type+str(num+1),type+str(num+2)))
         return possibleGroups
         
-    def dfsSearchGroup(dict):
-        if(isLegal(dict)): return False
+    def dfsSearchGroup(self,dict):
+        if(not self.isLegal(dict)): return False
         if(sum(dict.values())==2): #when only 2 tiles left, it should be a two of a kind
             return len(dict.keys())==1
         else:
-            tile = dict.keys()[0]
-            old = copy.deepcopy(dict)
-            for group in getGroup(tile):
-                dict[tile] = dict.get(tile,0)-1
-                dict[group[0]] = dict.get(group[0],0)-1
-                dict[group[1]] = dict.get(group[1],0)-1
-                if(dfsSearchGroup(dict)):
-                    return True
-                dict = copy.deepcopy(old)
-            
-        
-            
+            tile = ""
+            for t in dict.keys():
+                tile = t
+                old = copy.deepcopy(dict)
+                for group in self.getGroup(tile):
+                    dict[tile] = dict.get(tile,0)-1
+                    dict[group[0]] = dict.get(group[0],0)-1
+                    dict[group[1]] = dict.get(group[1],0)-1
+                    dict = {k:v for k,v in dict.items() if v!=0} # clear zeros so the next first tile is valid
+                    if(self.dfsSearchGroup(dict)):
+                        return True
+                    dict = copy.deepcopy(old)
+            return False
             
     
     def checkWin(self, draw = None):
@@ -81,6 +77,15 @@ class Player():
         hand = copy.deepcopy(self.hand)
         #add the drawn tile
         hand[self.draw] = hand.get(self.draw,0)+1
+        return self.dfsSearchGroup(hand)
         
-        
-        
+p = Player()
+h = {
+    "s1":2,
+    "s2":2,
+    "s3":2,
+    "s5":1
+    
+}
+p.setHand(h)
+print(p.checkWin(draw="s5"))
