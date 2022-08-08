@@ -10,7 +10,7 @@ def appStarted(app):
     pass
 
 def redrawAll(app,canvas):
-    canvas.create_text(500,500,text = "🀝")
+    canvas.create_text(500,500,text = "🀝", font = ("Segoe UI", 150), fill = "red")
 
 
 

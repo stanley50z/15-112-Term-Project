@@ -1,3 +1,5 @@
+from player import Player
+
 class game():
     # MahjongSoul has 3-player mode, 4-player mode, and some special modes
     # In this TP, I would's only do 3-player mode for its simplicity
@@ -6,27 +8,38 @@ class game():
         self.gameMode = gameMode
         self.deck = dict()
         
-        self.isRedTileMode = True # on for 4p, off for 3p
-        if(self.gameMode == '3p'): self.isRedTileMode = False
-        
-        self.playerScore = 0
-        self.p1Score = 0
-        self.p2Score = 0
-        self.p3Score = 0
+        self.isRedTileMode = True # on for Mahjong Soul, other Mahjong games may not have red tiles
+        self.players = []
+        self.playerScores = []
+        self.currentPlayer = 0
         self.setScore(self)
-        
+        self.initPlayers(self)
+      
     def setScore(self):
         if(self.gameMode == '3p'):
             #initial points
-            self.playerScore = 35000
-            self.p1Score = 35000
-            self.p2Score = 35000
+            self.playerScores = [35000,35000,35000]
         else:
-            self.playerScore = 25000
-            self.p1Score = 25000
-            self.p2Score = 25000
-            self.p3Score = 25000
+            self.playerScores = [25000,25000,25000]
 
+    def initPlayers(self):
+        player = Player()
+        p1 = Player()
+        p2 = Player()
+        self.players.append(player)
+        self.players.append(p1)
+        self.players.append(p2)
+    
+    def cyclePlayer(self,p = None):
+        # for chi & pon & kan, the game skip to the player who did the action
+        # otherwise, skip to the next player
+        if(p != None):
+            self.currentPlayer = p
+        else:
+            if(self.gameMode == '3p'):
+                self.currentPlayer = (self.currentPlayer+1)%3
+            elif(self.gameMode == '4p'):
+                self.currentPlayer = (self.currentPlayer+1)%4
             
     def createDeck(self): #pin 筒 sou 条 man 万
         deck = dict()
@@ -40,13 +53,11 @@ class game():
                 deck[tile] = 4
             for tile in self.DragonTiles:   # DragonTiles
                 deck[tile] = 4
-        if(self.isRedTileMode):
-                deck["s5"] = 3
-                deck["p5"] = 3
-                deck["m5"] = 3
-                deck["s5R"] = 1
-                deck["p5R"] = 1
-                deck["m5R"] = 1    
+            if(self.isRedTileMode):
+                    deck["s5"] = 3
+                    deck["p5"] = 3
+                    deck["s5R"] = 1
+                    deck["p5R"] = 1
             
     TerminalTiles = ['s1','s9','p1','p9','m1','m9','W','E','N','S','rd','wd','gd'] #幺九牌
     OneNineTiles = ['s1','s9','p1','p9','m1','m9'] #清老头牌
