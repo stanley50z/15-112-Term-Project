@@ -1,10 +1,16 @@
 from player import Player
-class ScoreCounter(Player):
-    def __init__(self):
+class ScoreCounter():
+    def __init__(self, player:Player):
         self.noOpenMelds = True #是否门清
+        self.draw = ""
+
+        self.hand = player.getHand()
+        self.board = player.getBoard()
+        self.draw = player.getDraw()
+
+
         self.han = 0 #役数
         self.fu = 0 #符数
-        self.draw = ""
         self.yaku = list() #役种，因为可以同时达成多个役种，所以是list而非单个变量
         
 

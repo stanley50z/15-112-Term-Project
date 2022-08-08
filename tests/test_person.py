@@ -8,5 +8,12 @@ h = {
     "W":3
     
 }
+melds = {
+    "rd" : 3
+    
+}
 p.setHand(h)
+p.setOpenMelds(melds)
+
 print(p.checkWin(draw="s5"))
+print(p.getFullHand())

@@ -107,7 +107,10 @@ class Player():
         return self.draw
     def getSQ(self)->int:
         return self.sq
-    
+    def getOpenMelds(self)->list:
+        return self.openMelds
+    def setOpenMelds(self,openMelds):
+        self.openMelds = openMelds
     
     def getFullHand(self) -> dict:
         fullHand = copy.deepcopy(self.hand)
@@ -115,6 +118,7 @@ class Player():
             for tile in group:
                 fullHand[tile] = fullHand.get(tile,0) + 1
         fullHand[self.draw] = fullHand.get(self.draw,0) + 1
+        return fullHand
         
         
         
