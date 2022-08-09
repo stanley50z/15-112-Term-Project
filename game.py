@@ -1,5 +1,8 @@
-from player import Player
+import sys
+sys.path.insert(0, '')
+from TermProject.player import Player
 
+# from player import Player
 class game():
     # MahjongSoul has 3-player mode, 4-player mode, and some special modes
     # In this TP, I would's only do 3-player mode for its simplicity
@@ -14,14 +17,8 @@ class game():
         self.currentPlayer = 0
         self.setScore(self)
         self.initPlayers(self)
-      
-    def setScore(self):
-        if(self.gameMode == '3p'):
-            #initial points
-            self.playerScores = [35000,35000,35000]
-        else:
-            self.playerScores = [25000,25000,25000]
-
+        self.dealer = 0
+    
     def initPlayers(self):
         player = Player()
         p1 = Player()
@@ -29,6 +26,18 @@ class game():
         self.players.append(player)
         self.players.append(p1)
         self.players.append(p2)
+        
+    def getDealerwind(self):
+        return self.players[self.dealer].getWind()
+    
+    def setScore(self):
+        if(self.gameMode == '3p'):
+            #initial points
+            self.playerScores = [35000,35000,35000]
+        else:
+            self.playerScores = [25000,25000,25000]
+
+
     
     def cyclePlayer(self,p = None):
         # for chi & pon & kan, the game skip to the player who did the action
@@ -59,10 +68,11 @@ class game():
                     deck["s5R"] = 1
                     deck["p5R"] = 1
             
-    TerminalTiles = ['s1','s9','p1','p9','m1','m9','W','E','N','S','rd','wd','gd'] #幺九牌
-    OneNineTiles = ['s1','s9','p1','p9','m1','m9'] #清老头牌
-    DragonTiles = ['rd','wd','gd'] #三元牌
-    WindTiles = ['W','S','E','N'] #风牌
-    WordTiles = DragonTiles + WindTiles #字牌
-    AllGreenTiles = ['s2','s3','s4','s6','s8','gd'] #绿一色牌
+    
+    OneNineTiles = {'s1','s9','p1','p9','m1','m9'} #清老头牌
+    DragonTiles = {'rd','wd','gd'} #三元牌
+    WindTiles = {'W','S','E','N'} #风牌
+    WordTiles = DragonTiles.union(WindTiles) #字牌
+    TerminalTiles = OneNineTiles.union(WordTiles) #幺九牌
+    AllGreenTiles = {'s2','s3','s4','s6','s8','gd'} #绿一色牌
         
