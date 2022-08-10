@@ -1,4 +1,6 @@
 import sys
+import math, decimal
+
 sys.path.insert(0, '')
 from TermProject.player import Player
 from TermProject.game import game
@@ -8,6 +10,33 @@ from TermProject.yaku_list import (kokushi, #limits
                                    chitoitsu,sanshoku,sankantsu,toitoiho,sananko,shosangen,honchantai_yaochu,ikkitsuukan, # 2 han
                                    ipeiko, richi, tanyaochu,pinfu,wind,dragon, tsumo # 1 han
                                    )
+from TermProject.Fu_util import fu_melds,fu_waits
+MANGAN = 8000
+# BASICTABLE = {
+#     1: {
+#         30:1300,        40:1600,
+#         50:1300,        60:2000,
+#         70:2300,        80:2600,
+#         90:2900,        100:3200,
+#         110:3600
+#         },
+#     2: {
+#         25:1600,        30:2000,
+#         40:2600,        50:3200,
+#         60:3900,        70:4500,
+#         80:5200,        90:5800,
+#         100:6400,        110:7100
+#         },
+#     3: {
+#         25:3200,        30:2000,
+#         40:5200,        50:3200,
+#         60:7700,        70:4500,
+#         80:5200,        90:5800,
+#         100:6400,        110:7100
+#         },
+#     4: {}
+# }
+
 # from player import Player
 # from yaku_list import (chitoitsu,tsumo,kokushi)
 class ScoreCounter():
@@ -25,10 +54,13 @@ class ScoreCounter():
         self.ankan = player.getAnkan()
         self.isRichi,self.isDoublerichi = player.getRichi()
         self.wind = player.getWind()
+        self.dealerWind = 'E'
         self.winningTile = player.getWinningTile()
-
+        
+        self.dora = ''
         self.han = 0 #役数
         self.fu = 0 #符数
+        self.point = 0
         self.yaku = list() #役种，因为可以同时达成多个役种，所以是list而非单个变量
     
 
@@ -145,11 +177,75 @@ class ScoreCounter():
                 self.yaku.append('pinfu')
         # TODO: haitei海底捞月，houtei河底捞鱼，rinchan岭上开花，chankan抢杠
         # these are all very luck-base yakus, and adding them won't make a big difference
-        # that being said, tsumo is also luck-based, but since it's way more common and involves with other game mechanics, I included it
-        # will add those yakus later to make the algorithm more accurate
+        # that being said, tsumo is also luck-based, but since it's way more common and involves with other game mechanics, so I included it
+        # I will add those yakus later to make the algorithm more accurate
+        
+    def checkDora(self):
+        for tile in self.fullhand.keys():
+            if tile == self.dora:
+                self.han += self.fullhand[tile]
+    def countFu(self):
+        fu = 20    # a winning hand gets 20 fu automatically (futei)
+        if(self.noOpenMelds and self.winningTile!=self.draw):
+            fu += 10 # if ron with no open melds, add 10
+        for group in self.handgroups:
+            fu += fu_melds(group,True,self.wind,self.dealerWind)
+        for group in self.openMelds:
+            fu += fu_melds(group,False,self.wind,self.dealerWind)
+        self.fu += fu_waits('',list())
+        if(self.winningTile == self.draw):
+            fu += 2 #TODO: pinfu exception
+        if('chitoitsu' in self.yaku):
+            return 25
+        else:
+            fu = math.ceil(fu/10) * 10  # fu always round UP to tens, except for chitoitsu, which is fixed at 25
+            return fu
+    
+    def roundHalfUp(self,d): #helper-fn
+        # Round to nearest with ties going away from zero.
+        rounding = decimal.ROUND_HALF_UP
+        # See other rounding options here:
+        # https://docs.python.org/3/library/decimal.html#rounding-modes
+        return int(decimal.Decimal(d).to_integral_value(rounding=rounding))
+    
+    # for this part of calculation, see here https://en.wikipedia.org/wiki/Japanese_mahjong_scoring_rules#Calculating_basic_points
+    def ScoreBasic(self):
+        han = self.han
+        fu = self.fu
+        basicPoints = fu * math.pow(2,2+han) * 2
+        basicPoints = self.roundHalfUp(basicPoints/100) * 100  # round up to the nearest 100
+        self.point = basicPoints
+    
+    # for this part of calculation, see here https://en.wikipedia.org/wiki/Japanese_mahjong_scoring_rules#Mangan
+    def ScoreMangan(self):
+        h = self.han
+        if(h<=5): # a hand with less than 5 han can be counted as Mangan if there are enough 'fu' points
+            self.point = MANGAN
+        elif h in range(6,8):
+            self.point = int(1.5*MANGAN)
+        elif h in range(8,11):
+            self.point = int(2*MANGAN)
+        elif h in range(11,13):
+            self.point = int(3*MANGAN)
+        elif h >= 13:
+            self.point = int(4*MANGAN*(h//13))
+
+    # the steps can be explained here https://en.wikipedia.org/wiki/Japanese_mahjong_scoring_rules
+    # 1. Check all yakus(winning patterns) and count 'han'
+    # 2. If 'han' is big enough, skip to no.5
+    # 3. Count 'fu', if 'han' and 'fu' combined is big enough, skip to no.5
+    # 4. Calculate basic points with 'han' and 'fu'
+    # 5. Multiply for dealer, tsumo, etc.
     def getScore(self,winningTile):
         self.checkYakus(winningTile)
-        return self.han*1000
+        if(self.han == 0): return 0
+        self.checkDora()    # Dora counts only when there's at least one yaku already
+        if(self.han<5):
+            self.fu = self.countFu()
+            self.ScoreBasic()
+        else:
+            self.ScoreMangan()
+        return self.point
         
 # TODO: Organize hand into groups (may have more than one ways to organize)
 # TODO: Catogrize group for detecting yaku(chi,pon,kan,etc)
@@ -171,3 +267,5 @@ if __name__ == '__main__':
     score = ScoreCounter(p)
     print(score.getScore(''))
     print(score.yaku)
+    print(score.han)
+    print(score.fu)

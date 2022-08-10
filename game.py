@@ -15,9 +15,12 @@ class game():
         self.players = []
         self.playerScores = []
         self.currentPlayer = 0
-        self.setScore(self)
-        self.initPlayers(self)
+        self.setScore()
+        self.initPlayers()
+        self.createDeck()
         self.dealer = 0
+        self.dora = ''
+        self.playGame()
     
     def initPlayers(self):
         player = Player()
@@ -29,6 +32,7 @@ class game():
         
     def getDealerwind(self):
         return self.players[self.dealer].getWind()
+    
     
     def setScore(self):
         if(self.gameMode == '3p'):
@@ -67,7 +71,45 @@ class game():
                     deck["p5"] = 3
                     deck["s5R"] = 1
                     deck["p5R"] = 1
-            
+        self.deck = deck
+    
+    def getDora(self,tile):
+        if tile in game.WindTiles:
+            winds = ['E','S','W','N','E']
+            return winds[winds.index(tile)+1]
+        elif tile in game.DragonTiles:
+            dragons = ['wd','gd','rd','wd']
+            return dragons[dragons.index(tile)+1]
+        else:
+            if(self.gameMode =='3p' and tile == 'm1'): return 'm9'
+            type,num = tile[0],tile[1]
+            if(num != '9'):
+                return type + str(int(num)+1)
+            else:
+                return type+'1'
+    @staticmethod
+    def listToDict(list:list):
+        d = dict()
+        for tile in list:
+            d[tile] = d.get(tile,0) + 1
+        return d
+    def deckRemove(self,tile):
+        self.deck[tile] -= 1
+    def getStart(self):
+        dora_indicator = input('Enter Dora Indicator: \n')
+        self.dora = self.getDora(dora_indicator)
+        self.deckRemove(dora_indicator)
+        # print(f'Dora is now {self.dora}')
+        # print(self.deck)
+        handList = input('Enter your hand: (split with spaces)\n').split()
+        self.players[0].setHand(game.listToDict(handList))
+        playerHand = self.players[0].getHand()
+        # print(f"Your hand is {playerHand}")
+        wind = input('Enter your wind: \n')
+        self.players[0].setWind(wind)
+        
+    def playGame(self):
+        self.getStart()
     
     OneNineTiles = {'s1','s9','p1','p9','m1','m9'} #清老头牌
     DragonTiles = {'rd','wd','gd'} #三元牌
@@ -76,3 +118,7 @@ class game():
     TerminalTiles = OneNineTiles.union(WordTiles) #幺九牌
     AllGreenTiles = {'s2','s3','s4','s6','s8','gd'} #绿一色牌
         
+if __name__ == '__main__':
+    game1 = game()
+    # print(game1.getDora('s5'))
+    
