@@ -1,12 +1,12 @@
 import sys
 sys.path.insert(0, '')
-from TermProject.game import game
+from TermProject.tile import tile_constants
 
 def isJunchantai_yaochu(groups):
     for group in groups:
         isOneNine = False
         for tile in (group):
-            if tile in game.WordTiles:
+            if tile in tile_constants.WordTiles:
                 return False
             if(tile[1]=='1' or tile[1]=='9'):
                 isOneNine = True

@@ -1,14 +1,14 @@
 import sys
 sys.path.insert(0, '')
-from TermProject.game import game
+from TermProject.tile import tile_constants
 
 def isKokushi(fullhand): #国士无双
-    for onenine in game.OneNineTiles:
+    for onenine in tile_constants.OneNineTiles:
         if onenine not in fullhand.keys():
             return False
     return True
 def isKokushi13(hand): #国士无双13面
-    for onenine in game.OneNineTiles:
+    for onenine in tile_constants.OneNineTiles:
         if onenine not in hand.keys():
             return False
 

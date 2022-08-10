@@ -1,10 +1,10 @@
 import sys, copy
 sys.path.insert(0, '')
-from TermProject.game import game
+from TermProject.tile import tile_constants
 def isHoniso(fullhand):
     # check if the hand has word tiles(we don't want both chiniso and honiso to be true)
     WordTiles = []
-    for tile in game.WordTiles:
+    for tile in tile_constants.WordTiles:
         if tile in fullhand.keys():
             WordTiles.append(tile)
     if len(WordTiles)==0: return False

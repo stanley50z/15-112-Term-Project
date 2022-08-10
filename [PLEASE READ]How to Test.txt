@@ -1,0 +1,5 @@
+pPlease ignore the files in 'tests' folder, they don't work anymore
+Instead, just run game.py, player.py, and score.py files.
+When they are run as the main function, they will test themselves automatically.
+If you know Mahjong, feel free to do your own test cases.
+Whether you know it or not, please read the comments near my own test cases.

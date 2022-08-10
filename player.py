@@ -2,13 +2,15 @@ import copy
 import string
 
 class Player():
-    def __init__(self):
+    def __init__(self,name):
         self.hand = dict() #key: tileType, value: number of tile
         self.openMelds = list() #List of tuples that represent groups
         self.board = list()
         self.groups = list()
+        self.allCombos = list()
         # self.handgroups = list()
         
+        self.playerName = name
         self.ankan = 0
         self.winningTiles = set()
         self.isRichi = False
@@ -20,9 +22,16 @@ class Player():
 
     def add(self,tile):
         self.hand[tile] = self.hand.get(tile,0) + 1
+    def remove(self,tile):
+        self.hand[tile] = self.hand.get(tile,0) - 1
+        self.hand = {k:v for k,v in self.hand.items() if v!=0}
+
     def discard(self, tile):
         # if(tile not in self.hand.keys()):
         #     return False
+        if(self.playerName != 'player'):
+            self.board.append(tile)
+            return
         if(tile != self.draw):
             self.sq += 1
         self.hand[tile] = self.hand.get(tile,0) - 1
@@ -77,38 +86,80 @@ class Player():
     #                     return True
     #                 dict = copy.deepcopy(old)
     #         return False
-    def dfsSearchGroup(self,dict:dict,groups:list):
-        dict = copy.deepcopy(dict)
-        if(sum(dict.values())==2): #when only 2 tiles left, it should be a two of a kind
-            if(len(dict.keys())==1):
-                for key in dict.keys():
-                    groups.append((key,key)) #tuple, no aliasing
-                return True,groups
-            else:
-                False,[]
-        else:
-            tile = ""
-            for t in dict.keys():
-                tile = t
-                old = copy.deepcopy(dict)
-                for group in Player.getTileGroup(tile):
-                    dict[tile] = dict.get(tile,0)-1
-                    dict[group[0]] = dict.get(group[0],0)-1
-                    dict[group[1]] = dict.get(group[1],0)-1
-                    dict = {k:v for k,v in dict.items() if v!=0} # clear zeros so the next first tile is valid
-                    if(not self.isLegal(dict)):
-                        dict = copy.deepcopy(old)
-                        # return False,[]
+    
+    def SearchGroup(self,dict:dict = None):
+        if dict == None: dict = copy.deepcopy(self.getHand())
+        AllCombos = []
+        for key in dict.keys():
+            if(dict[key]>=2):
+                dict[key] -= 2
+                dict = {k:v for k,v in dict.items() if v!=0}
+                ans = self.dfsSearchGroup(dict,[(key,key)])
+                if(ans[0]):
+                    AllCombos.append(ans[1])
+                dict[key] = dict.get(key,0)+2
+        self.allCombos = AllCombos
+    
+    def dfsSearchGroup(self,dct:dict,grps:list):
+        dict = copy.deepcopy(dct)
+        groups = copy.deepcopy(grps)
+        # if(sum(dict.values())==2): #when only 2 tiles left, it should be a two of a kind
+        #     if(len(dict.keys())==1):
+        #         for key in dict.keys():
+        #             groups.append((key,key)) #tuple, no aliasing
+        #         return True,groups
+        #     else:
+        #         return False,[]
+        # else:
+        if(len(dict.keys()) == 0):
+            return True,groups
+        tile = ""
+        for t in dict.keys():
+            tile = t
+            old = copy.deepcopy(dict)
+            for group in Player.getTileGroup(tile):
+                dict[tile] = dict.get(tile,0)-1
+                dict[group[0]] = dict.get(group[0],0)-1
+                dict[group[1]] = dict.get(group[1],0)-1
+                dict = {k:v for k,v in dict.items() if v!=0} # clear zeros so the next first tile is valid
+                if(not self.isLegal(dict)):
+                    dict = copy.deepcopy(old)
+                else:
+                    groups.append((tile,group[0],group[1]))
+                    ans = self.dfsSearchGroup(dict,groups)
+                    if(ans[0]): 
+                        return True,ans[1]
                     else:
-                        groups.append((tile,group[0],group[1]))
-                        ans = self.dfsSearchGroup(dict,groups)
-                        if(ans[0]): 
-                            # self.groups.append(ans[1])
-                            return True,ans[1]
-                        else:
-                            return False,[]
-                    # return False,[]
-               
+                        return False,[]
+            return False,[]
+    # def dfsSearchGroup(self,dict:dict,grps:list = list()):
+    #     groups = copy.deepcopy(grps)
+    #     dict = copy.deepcopy(dict)
+    #     if(sum(dict.values())==2): #when only 2 tiles left, it should be a two of a kind
+    #         if(len(dict.keys())==1):
+    #             for key in dict.keys():
+    #                 groups.append((key,key)) #tuple, no aliasing
+    #             self.groups.append(groups)
+    #     else:
+    #         tile = ""
+    #         for t in dict.keys():
+    #             tile = t
+    #             oldGroups = groups
+    #             for tileGroup in Player.getTileGroup(tile):
+    #                 oldDict = copy.deepcopy(dict)
+    #                 dict[tile] = dict.get(tile,0)-1
+    #                 dict[tileGroup[0]] = dict.get(tileGroup[0],0)-1
+    #                 dict[tileGroup[1]] = dict.get(tileGroup[1],0)-1
+    #                 dict = {k:v for k,v in dict.items() if v!=0} # clear zeros so the next first tile is valid
+    #                 if(not self.isLegal(dict)):
+    #                     pass
+    #                 else:
+    #                     groups.append((tile,tileGroup[0],tileGroup[1]))
+    #                     self.dfsSearchGroup(dict,groups)
+    #                 dict = copy.deepcopy(oldDict)
+    #                 groups = oldGroups
+    #     return
+    
     def checkWin(self, draw = None):# put this in game.py?
         if draw == None:
             draw = self.draw
@@ -125,14 +176,18 @@ class Player():
     
     def addSQ(self):
         self.sq += 1
-
+    def addAnkan(self):
+        self.ankan += 1
     #  ██████╗ ███████╗████████╗       ██╗       ███████╗███████╗████████╗
     # ██╔════╝ ██╔════╝╚══██╔══╝       ██║       ██╔════╝██╔════╝╚══██╔══╝
     # ██║  ███╗█████╗     ██║       ████████╗    ███████╗█████╗     ██║   
     # ██║   ██║██╔══╝     ██║       ██╔═██╔═╝    ╚════██║██╔══╝     ██║   
     # ╚██████╔╝███████╗   ██║       ██████║      ███████║███████╗   ██║   
     #  ╚═════╝ ╚══════╝   ╚═╝       ╚═════╝      ╚══════╝╚══════╝   ╚═╝   
-                                                                        
+    def setName(self,name):
+        self.playerName = name
+    def getName(self):
+        return self.playerName                                                        
     def setHand(self,dict:dict):    
         self.hand = dict
     def getHand(self)->dict:        
@@ -152,13 +207,14 @@ class Player():
     def setOpenMelds(self,openMelds):
         self.openMelds = openMelds
     def getGroups(self)->list:
+        
         return self.getHandGroups()+self.openMelds
     def getHandGroups(self):
-        ans = self.dfsSearchGroup(self.getHand(),list())
-        if(ans[0]):
-            return ans[1]
+        self.SearchGroup()
+        if(len(self.allCombos) == 0):
+            return None
         else:
-            return []
+            return self.allCombos[0]
     def getAnkan(self):
         return self.ankan
     def getWind(self):
@@ -181,18 +237,32 @@ class Player():
     def getWinningTile(self):
         return self.winningTiles
 if __name__ == '__main__':      
-    p = Player()
+    p = Player('player')
     h = {
         "s1":2,
         "s2":2,
         "s3":2,
-        "s4":2,
+        "wd":1,
+        "S":1,
         "W":3
         
     }
     melds = [('rd','rd','rd')]
-    p.setHand(h)
+    h2 = {
+        "s1":2,
+        "s2":1,
+        "s3":1,
+        "s4":4,
+        "s5":1,
+        "s6":1,
+        "s7":1
+        
+    }
+    p.setHand(h2)
     p.setOpenMelds(melds)
-
-    print(p.dfsSearchGroup(h,list()))
+    
+    # getGroup is only meant to be executed when the hand is ready-to-win
+    # if a no-yaku hand like h is given IN TEST, there will be an error thrown,
+    # and that's by design, when actually calling, there are precautions that prevent actual errors when using this
+    print(p.getGroups())
         

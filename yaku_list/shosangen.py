@@ -1,10 +1,10 @@
 import sys
 sys.path.insert(0, '')
-from TermProject.game import game
+from TermProject.tile import tile_constants
 
 def isShosangan(fullhand):
     istwo = False
-    for tile in game.DragonTiles:
+    for tile in tile_constants.DragonTiles:
         if tile not in fullhand.keys():
             return False
         else:

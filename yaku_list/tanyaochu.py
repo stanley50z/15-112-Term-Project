@@ -1,9 +1,9 @@
 import sys
 sys.path.insert(0, '')
-from TermProject.game import game
+from TermProject.tile import tile_constants
 def isTanyaochu(fullhand):
     for tile in fullhand.keys():
-        if tile in game.TerminalTiles:
+        if tile in tile_constants.TerminalTiles:
             return False
     return True
 

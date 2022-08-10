@@ -1,15 +1,15 @@
 import sys
 sys.path.insert(0, '')
-from TermProject.game import game
+from TermProject.tile import tile_constants
 from TermProject.yaku_list.toitoiho import isToi
 
 def isPinfu(groups, draw, selfwind):
     found = False
-    if draw in game.WordTiles: return False                                 # the draw must not be a word tile
+    if draw in tile_constants.WordTiles: return False                                 # the draw must not be a word tile
     for group in groups:
         if(len(group)==2):                                                  # the pair must not be a dragon tile or self wind
             for tile in group:
-                if tile == selfwind or tile in game.DragonTiles:
+                if tile == selfwind or tile in tile_constants.DragonTiles:
                     return False
         elif(draw in group):
             type = draw[0]

@@ -1,13 +1,13 @@
 import sys, copy
 sys.path.insert(0, '')
-from TermProject.game import game
+from TermProject.tile import tile_constants
 
 def isHonchantai_yaochu(groups):
     for group in groups:
         isOneNineorWord = False
         for tile in (group):
             # short circuit, otherwise, wind tiles don't have a second digit
-            if(tile in game.WordTiles or tile[1]=='1' or tile[1]=='9' ):
+            if(tile in tile_constants.WordTiles or tile[1]=='1' or tile[1]=='9' ):
                 isOneNineorWord = True
         if not isOneNineorWord: return False
     return True
