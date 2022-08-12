@@ -11,7 +11,7 @@ from TermProject.yaku_list import (kokushi, #limits
                                    ipeiko, richi, tanyaochu,pinfu,wind,dragon, tsumo # 1 han
                                    )
 from TermProject.Fu_util import fu_melds,fu_waits
-MANGAN = 8000
+MANGAN = 4000
 # BASICTABLE = {
 #     1: {
 #         30:1300,        40:1600,
@@ -254,11 +254,11 @@ class ScoreCounter():
             self.ScoreBasic()
         else:
             self.ScoreMangan()
-        # print(self.yaku)
-        # print(self.han)
-        # print(self.fu)
+        print(self.yaku)
+        print(self.han)
+        print(self.fu)
         if(self.wind == 'E'):
-            return self.point*3
+            return self.point*3 
         else:
             return self.point*2
     def getYaku(self):

@@ -67,26 +67,9 @@ class Player():
                 possibleGroups.append((type+str(num-1),type+str(num+1)))
                 possibleGroups.append((type+str(num+1),type+str(num+2)))
         return possibleGroups
-        
-    # def dfsSearchGroup(self,dict):
-    #     if(not self.isLegal(dict)): return False
-    #     if(sum(dict.values())==2): #when only 2 tiles left, it should be a two of a kind
-    #         return len(dict.keys())==1
-    #     else:
-    #         tile = ""
-    #         for t in dict.keys():
-    #             tile = t
-    #             old = copy.deepcopy(dict)
-    #             for group in Player.getGroup(tile):
-    #                 dict[tile] = dict.get(tile,0)-1
-    #                 dict[group[0]] = dict.get(group[0],0)-1
-    #                 dict[group[1]] = dict.get(group[1],0)-1
-    #                 dict = {k:v for k,v in dict.items() if v!=0} # clear zeros so the next first tile is valid
-    #                 if(self.dfsSearchGroup(dict)):
-    #                     return True
-    #                 dict = copy.deepcopy(old)
-    #         return False
     
+    
+    # first, I pick the pair
     def SearchGroup(self,dict:dict = None):
         if dict == None: dict = copy.deepcopy(self.getHand())
         AllCombos = []
@@ -100,17 +83,12 @@ class Player():
                 dict[key] = dict.get(key,0)+2
         self.allCombos = AllCombos
     
+    # second, I try to form the rest of HAND to groups
+    # note that this is only searching the hand and check if it fits the basic pattern
+    # after picking out the pair, the rest of a winning hand should have len%3==0
     def dfsSearchGroup(self,dct:dict,grps:list):
         dict = copy.deepcopy(dct)
         groups = copy.deepcopy(grps)
-        # if(sum(dict.values())==2): #when only 2 tiles left, it should be a two of a kind
-        #     if(len(dict.keys())==1):
-        #         for key in dict.keys():
-        #             groups.append((key,key)) #tuple, no aliasing
-        #         return True,groups
-        #     else:
-        #         return False,[]
-        # else:
         if(len(dict.keys()) == 0):
             return True,groups
         tile = ""
@@ -132,33 +110,7 @@ class Player():
                     else:
                         return False,[]
             return False,[]
-    # def dfsSearchGroup(self,dict:dict,grps:list = list()):
-    #     groups = copy.deepcopy(grps)
-    #     dict = copy.deepcopy(dict)
-    #     if(sum(dict.values())==2): #when only 2 tiles left, it should be a two of a kind
-    #         if(len(dict.keys())==1):
-    #             for key in dict.keys():
-    #                 groups.append((key,key)) #tuple, no aliasing
-    #             self.groups.append(groups)
-    #     else:
-    #         tile = ""
-    #         for t in dict.keys():
-    #             tile = t
-    #             oldGroups = groups
-    #             for tileGroup in Player.getTileGroup(tile):
-    #                 oldDict = copy.deepcopy(dict)
-    #                 dict[tile] = dict.get(tile,0)-1
-    #                 dict[tileGroup[0]] = dict.get(tileGroup[0],0)-1
-    #                 dict[tileGroup[1]] = dict.get(tileGroup[1],0)-1
-    #                 dict = {k:v for k,v in dict.items() if v!=0} # clear zeros so the next first tile is valid
-    #                 if(not self.isLegal(dict)):
-    #                     pass
-    #                 else:
-    #                     groups.append((tile,tileGroup[0],tileGroup[1]))
-    #                     self.dfsSearchGroup(dict,groups)
-    #                 dict = copy.deepcopy(oldDict)
-    #                 groups = oldGroups
-    #     return
+    
     
     def checkWin(self, draw = None):# put this in game.py?
         if draw == None:
