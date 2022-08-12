@@ -1,9 +1,9 @@
-import sys, copy
-sys.path.insert(0, '')
-
-from TermProject.tile import tile_constants
-from TermProject.player import Player
-from TermProject.score import ScoreCounter
+# import sys
+# sys.path.insert(0, '')
+import copy
+from tile import tile_constants
+from player import Player
+from score import ScoreCounter
 
 # from player import Player
 class game():
@@ -105,6 +105,8 @@ class game():
             for group in player.getOpenMelds():
                 for tile in group:
                     deck[tile] -= 1
+        for tile in self.players[0].getHand().keys():
+            deck[tile] -= self.players[0].getHand()[tile]
         deck = {k:v for k,v in deck.items() if v!=0}
         self.deck = deck
     # for every kind of tile, count how many of the tiles are still in the deck
@@ -113,6 +115,11 @@ class game():
         for tile in self.deck.keys():
             count += self.deck.get(tile)
         return count
+    # return deck
+    def getDeck(self):
+        self.updateDeck()
+        return self.deck
+    
     # get the probabily of randomly picking out the tile from deck
     def getChance(self, tile):
         self.updateDeck()
@@ -253,6 +260,7 @@ class game():
         self.players[0].add(tile)
         self.lastTile = tile
         return
+    
     def discardTile(self,tile):
         cp = self.getCurrentPlayer()
         self.players[cp].discard(tile)
@@ -313,7 +321,7 @@ class game():
         avgScore = 0
         yakus = set()
         discardList = list()
-        print('tenpai:')
+        # print('tenpai:')
         for discard in TenPaiMoves:
             self.players[0].remove(discard)
             winningTiles = self.getWinningTiles(self.players[0])

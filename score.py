@@ -254,9 +254,9 @@ class ScoreCounter():
             self.ScoreBasic()
         else:
             self.ScoreMangan()
-        print(self.yaku)
-        print(self.han)
-        print(self.fu)
+        # print(self.yaku)
+        # print(self.han)
+        # print(self.fu)
         if(self.wind == 'E'):
             return self.point*3 
         else:

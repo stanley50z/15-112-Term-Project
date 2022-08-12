@@ -3,7 +3,7 @@ from game import game
 from tile import tile_constants
 
 def playMahjong():
-    runApp(width=640,height=1080)
+    runApp(width=640,height=1120)
 
 def appStarted(app):
     app.input = ''
@@ -202,6 +202,15 @@ def drawTileBlocks(app,canvas):
                        anchor = 'n',
                        text = text,
                        font = font)
+    for row in range(6):
+        for col in range(5):
+            if row == 5 and col == 4:return
+            tile = app.tiles[row][col]
+            text = app.game.getDeck().get(tile,0)
+            canvas.create_text(20+42.5+col*128,65+120+row*175,
+                                anchor = 'n',
+                                text = text,
+                                font = ("Segoe UI", 20))
     
 def drawButtons(app,canvas):
     for action in app.buttonBounds.keys():
@@ -216,13 +225,12 @@ def drawPlayers(app,canvas):
         canvas.create_rectangle(bx0,by0,bx1,by1,fill='white',width=2)
         canvas.create_text((bx0+bx1)/2,(by0+by1)/2,text = player,font=("Segoe UI", 50))
 
-
 def drawActionButton(app,canvas):
     bx0,by0,bx1,by1 = app.buttonBounds['-a']
     canvas.create_rectangle(bx0,by0,bx1,by1,fill = 'pink')
     canvas.create_text((bx0+bx1)/2,(by0+by1)/2,text = 'Action',font=("Segoe UI", 20))
 
-def drawMessage(app,canvas):
+def printMessage(app,canvas):
     cp = app.game.getCurrentPlayer()
     msg = ''
     if(app.isAction):
@@ -235,6 +243,14 @@ def drawMessage(app,canvas):
     canvas.create_text(app.midx,20,
                        text = msg,
                        font = ("Segoe UI", 10),
+                       anchor='n')
+
+def printAnalysis(app,canvas):
+    analysis = app.game.getAnalysis()
+    msg = str(analysis[0])+'\n'+str(analysis[1])
+    canvas.create_text(50,650,
+                       text = msg,
+                       font = ("Segoe UI", 20),
                        anchor='n')
 
 def printMouse(app,canvas):
@@ -254,11 +270,13 @@ def redrawAll(app,canvas):
     if app.isAction:
         drawButtons(app,canvas)
         drawPlayers(app,canvas)
+        printAnalysis(app,canvas)
     else:
         drawTileBlocks(app,canvas)
     drawActionButton(app,canvas)
-    drawMessage(app,canvas)
+    printMessage(app,canvas)
     printMouse(app,canvas)
+    
     pass
 
 
